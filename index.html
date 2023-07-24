@@ -1,0 +1,123 @@
+<html>
+
+<head>
+  <script src="matter.min.js"></script>
+  <script src="
+https://cdn.jsdelivr.net/npm/pathseg@1.2.1/pathseg.min.js
+"></script>
+
+  <style>
+    html {
+      overflow-y: auto;
+    }
+  </style>
+</head>
+
+<body style="margin: 0">
+
+  <img src="rock.png" id="rock1" style="display: none;" />
+
+  <svg width="171" id="mask" height="164" viewBox="0 0 171 164" fill="none" xmlns="http://www.w3.org/2000/svg"
+    style="display: none;">
+    <path
+      d="M38.5 7.8851C16.9 23.4851 3.83333 61.0518 0 77.8851C0 114.385 23 127.385 34.5 143.885C43.7 157.085 72.6667 162.385 86 163.385C106.833 156.885 149.7 141.185 154.5 130.385C160.5 116.885 169.5 116.885 170.5 107.885C171.5 98.8851 171.5 98.8851 156.5 62.8851C144.5 34.0851 121.5 16.2184 111.5 10.8851C96.1667 3.3851 60.1 -7.7149 38.5 7.8851Z"
+      fill="black" />
+  </svg>
+
+  <div id="the-canvas" style="width: 100vw; height: 100vh; position: fixed; left: 0; top: 0; z-index: -1"></div>
+
+  <div style="position: absolute; z-index: 5; left: 50%; top: 50%;">
+    <h1 style="color: white;">
+      This is a test
+    </h1>
+  </div>
+
+  <!-- <div style="display: flex; justify-content: center; width: 100vw; margin-top: 45vh;">
+    <h1 style="color: white;">Test 2</h1>
+  </div> -->
+
+  <script>
+
+    function load() {
+      // module aliases
+      var Engine = Matter.Engine,
+        Render = Matter.Render,
+        Runner = Matter.Runner,
+        Bodies = Matter.Bodies,
+        Mouse = Matter.Mouse,
+        MouseConstraint = Matter.MouseConstraint,
+        Composite = Matter.Composite;
+
+
+      const path = document.getElementById('mask').querySelector('path')
+      const vertices = Matter.Svg.pathToVertices(path);
+
+      const rock = Bodies.fromVertices(350, 150, vertices, {
+        render: {
+          sprite: {
+            texture: 'rock.png', // Set the image source as the texture
+          }
+        }
+      })
+
+      // create an engine
+      var engine = Engine.create();
+
+      // create a renderer
+      var render = Render.create({
+        element: document.getElementById('the-canvas'),
+        engine: engine,
+        options: {
+          width: document.body.clientWidth,
+          height: document.body.clientHeight,
+          wireframes: false,
+        }
+      });
+
+      const screenWidth = document.body.clientWidth;
+      const screenHeight = document.body.clientHeight;
+
+      // create two boxes and a ground
+      var left = Bodies.rectangle(5, screenHeight / 2, 1, screenHeight, { isStatic: true });
+      var right = Bodies.rectangle(screenWidth - 5, screenHeight / 2, 1, screenHeight, { isStatic: true });
+
+      var top = Bodies.rectangle(screenWidth / 2, 5, screenWidth, 1, { isStatic: true });
+      var bottom = Bodies.rectangle(screenWidth / 2, screenHeight - 5, screenWidth, 1, { isStatic: true });
+
+      // add all of the bodies to the world
+      Composite.add(engine.world, [rock, left, right, top, bottom]);
+
+      var mouse = Mouse.create(document.body),
+        mouseConstraint = MouseConstraint.create(engine, {
+          mouse: mouse,
+          constraint: {
+            stiffness: 0.2,
+            render: {
+              visible: false
+            }
+          }
+        });
+
+      Composite.add(engine.world, mouseConstraint);
+
+      // run the renderer
+      Render.run(render);
+
+      // create runner
+      var runner = Runner.create();
+
+      // run the engine
+      Runner.run(runner, engine);
+    }
+
+    load();
+
+    window.onresize = function () {
+      load();
+    };
+
+  </script>
+
+</body>
+
+</html>
